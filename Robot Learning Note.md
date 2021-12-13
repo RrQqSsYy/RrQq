@@ -1,6 +1,8 @@
 # Robot Learning Note
 
-## Linux基础命令
+## Linux
+
+#### Linux基础命令
 
 - $ cat file1 file2 ...：将文件file1, file2等的内容拼接起来并显示，然后退出。
 
@@ -42,7 +44,7 @@
 
 - $ mkdir dir：创建一个名为dir的新目录。
 
-- $ rmdir dir：删除一个目录。rmdir只能删除空目录。可以使用rm -rf来删除一个目录及其中的所有内容。
+  $ rmdir dir：删除一个目录。rmdir只能删除空目录。可以使用rm -rf来删除一个目录及其中的所有内容。
 
 - $ grep s dir：显示文件和输入流dir中和参数s匹配的行的内容。
 
@@ -54,17 +56,24 @@
 
 - $ pwd：显示当前目录的绝对路径。
 
+
 - $ diff file1 file2：查看两个文件之间的不同。
+
 
 - $ file file：获取一个文件的格式信息。
 
+
 - $ find [目录名] [选项] [查找条件]：在指定目录中寻找符合选项条件的文件。
+
 
 - $ head -n file/ $ tail -n file命令显示文件的前n行内容，tail命令显示文件的最后n行内容，n参数缺省默认10行。如果要从第n行开始显示所有内容，使用tail +n。
 
+
 - $ sort：将文件内的所有行按照字幕顺序排序，使用-n选项按照数字顺序排序那些以数字开头的行，使用-r选项反转排序。
 
+
 - $ passwd username：更改用户密码。
+
 
 - 命令路径PATH：存放路径，路径之间以冒号分隔。
 
@@ -74,9 +83,12 @@
 
 - $ info [指令]：查看指令相关帮助信息。
 
+
 - $ man [指令]：查看指令相关手册。
 
+
 - $ clear：刷新屏幕，并保留历史命令操作记录。
+
 
 - $ command > file：将命令的执行结果输出到文件（默认终端屏幕）。如果文件file不存在，则创建一个新的file文件；如果file文件已经存在，Shell会清空文件内容。
 
@@ -102,6 +114,7 @@
 
 - $ ps：列出所有正在运行的进程。PID：进程ID。TTY：进程所在的终端设备。STAT：进程状态，就是进程在内存中的状态。TIME：进程目前为止所用CPU时长。COMMAND：进程名。
 
+
 - $ kill pid：终止一个进程。
 
   $ kill -STOP pid：被暂停的进程仍然停留在内存，等待被继续执行。
@@ -110,6 +123,7 @@
 
 - 在命令行末尾添加&操作符将进程设置为后台运行。
 
+
 - $ chmod file：更改文件权限。
 
   $ chmod g+r file：为用户组（g）加上可读权限（r）。
@@ -117,6 +131,7 @@
   $ chmod o+r file：为其他用户（o）加上可读权限（r）。
 
 - $ ln -s target linkname：创建符号链接，相当于文件的别名。linkname参数是符号链接名称，target参数是要指向的目标路径，-s选项表示这是一个符号链接。
+
 
 - $ gunzip file.gz：解压缩.gz文件。
 
@@ -134,19 +149,24 @@
 
   $ tar xvf archive.tar：解压缩tar文件。选项x代表解压模式。还可以只解压归档文件中的某几个文件，只需要在命令后面加上这些文件的文件名。
 
-- $ zcat file：显示压缩包中文件的内容。
+  $ zcat file：显示压缩包中文件的内容。
 
-- 其他压缩/解压缩命令：bzip2/bunzip2，xz/unxz。
+  其他压缩/解压缩命令：bzip2/bunzip2，xz/unxz。
 
 - $ sudo：以root用户身份执行命令。
 
+
 - $ ping：用于检测主机。
+
 
 - $ htop：显示系统中正在运行的进程的实时状态。
 
+
 - $ ps：显示当前进程的状态，参数：-A 列出所有的进程；-w 显示加宽可以显示较多的资讯；-au 显示较详细的资讯；-aux 显示所有包含其他使用者的行程。
 
+
 - $ history n：显示历史执行过的n条命令。! number执行第几条命令；! command从最近的命令查到以command开头的命令执行；!!执行上一条 。
+
 
 - $ ifconfig
 
@@ -154,17 +174,100 @@
 
 - $ apt-get install software_name：安装软件 
 
-- $ sudo apt-get update：下载最新的软件列表
+  $ sudo apt-get update：下载最新的软件列表
 
-- $ sudo apt-get upgrade：安装更新
+  $ sudo apt-get upgrade：安装更新
 
 - Ctrl+C：结束当前命令进程。
+
 
 - $ stty -echo #：设置输入字符不回显。
 
   $ stty echo #：设置输入字符回显。
 
-  
+#### Linux操作案例
+
+##### 串口登录
+
+1. 使用数据线连接Linux开发板，“win+X”快捷键打开设备管理器，检查串口
+2. 使用Putty软件串口登录开发板（记得将波特率改为115200）
+
+##### 获取从机IP地址
+
+1. 使用串口登录Linux开发板，并确保开发板和电脑在同一局域网内
+2. 在命令窗口内输入ifconfig指令，获取开发板在局域网下IP地址
+
+##### SSH远程登录
+
+1. 已知IP地址时，使用Putty软件SSH选项远程登录开发板
+
+##### WIFI配置
+
+1. 切换到root用户：su root
+
+2. 开启wifi：nmcli r wifi on
+
+3. 扫描附近wifi：nmcli dev wifi
+
+4. 连接特定wifi：nmcli dev wifi connect “WIFINAME” password “PASSWORD” ifname wlan0
+
+5. sudo ifconfig wlan0 down
+
+   sudo ifconfig wlan0 up：重启网卡设备
+
+##### 开机自启动脚本文件
+
+1. 编写service文件
+
+   - 编写如下样式的.service文件
+
+   ```shell
+   [Unit]
+   Description=yourDescription
+   After=network.service
+   [Service]
+   Type=simple
+   User=root
+   Group=root
+   WorkingDirectory=yourSrcPath
+   ExecStart=/yourInstallPath/NAME.sh
+   PrivateTmp=true
+   Restart=on-failure
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+   - 使用指令：sudo cp NAME.service /etc/systemd/system/NAME.service将service文件转移到/etc/systemd/system文件夹下
+   - Type指定了我的类型是simple；after指定了启动network.service服务后开始启动我的服务；ExecStart指定了执行/usr/bin/NAME.sh；WorkingDirectory指定了工作空间；PrivateTmp指定了开启独立的进程空间，
+
+2. 编写sh脚本
+
+   - 如下形式编写.sh脚本文件
+
+     ```shell
+     #!/bin/bash
+     sleep 10
+     cd /home/pi/Documents/LCDDisplay
+     sudo python lcd_clock.py
+     ```
+
+   - #!/bin/bash：制定脚本解释器
+
+     sleep 10：等待一段时间，防止启动失败
+
+     sudo python lcd_clock.py：执行制定py文件
+
+3. 开启服务
+
+   - sudo systemctl start NAME.service：开启开机启动服务
+
+     sudo systemctl enable NAME.service：激活开机启动服务
+
+     sudo systemctl status NAME.service：查看开机启动服务状态
+
+#### Ubuntu系统使用技巧
+
+- 
 
 ## Git操作及命令
 
@@ -548,6 +651,23 @@
   	if (a < b) return a;
   	else return (T2)b;
   }
+  ```
+
+##### 友元函数
+
+- 友元函数是一个不属于类成员的函数，但它可以访问该类的私有成员。通过将关键字 friend 放置在类定义内，函数的原型前，即可将函数声明为友元。
+- friend <return type><function name> (<parameter type list>);
+
+##### 函数指针
+
+- 通过指针调用函数：
+
+  ```c++
+  void func(int x){    //函数原型定义
+  	cout << x;
+  }
+  void (*f)(int x) = func;    //定义函数指针（函数指针+参数表=原型函数名）
+  f(1);                //使用函数指针调用函数
   ```
 
 ##### 动态内存分配
@@ -1429,17 +1549,6 @@
 
    ```python
    capture = cv2.VideoCapture(0) #打开摄像头
-   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-   outfile = cv2.VideoWriter('output.avi', fourcc, 25., (640, 480))  #定义编码方式并创建VideoWriter对象
-   
-   while(True):
-       ret, frame = capture.read()  # 获取一帧
-       
-       # 将这帧进行上述转换
-       #......
-       
-       outfile.write(result)
-       cv2.imshow('result', result)capture = cv2.VideoCapture(0) #打开摄像头
    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
    outfile = cv2.VideoWriter('output.avi', fourcc, 25., (640, 480))  #定义编码方式并创建VideoWriter对象
    
