@@ -1,4 +1,4 @@
-# Robot Learning Note
+Robot Learning Note
 
 ## Linux
 
@@ -636,27 +636,33 @@
 
 - 运算符重载：重新定义运算，方便特殊类型的变量进行运算。
 
+  ```c++
   [返回值类型] operator [原运算符] (参数1, 参数2) {
       [运算]
   	return [返回值];
   }
-
-##### 模板函数
+  ```
+  
+  ```c++
+  // 备注：=可以用this指针来返回
+  String& operator=(const String& other) {    // 赋值函数
+  	strcpy_s(m_data, strlen(other.m_data) + 1, other.m_data);
+    	cout << "赋值成功！" << endl;
+    	return *this;
+  };  
+  ```
+  
+  模板函数
 
 - 模板函数：通过模板函数，自动生成一个针对T类型的具体函数。
 
   ```c++
-  template<class T1, class T2>
+  template <class T1, class T2>
   	T1 minValue(T1 a, T2 b) {
   	if (a < b) return a;
   	else return (T2)b;
   }
   ```
-
-##### 友元函数
-
-- 友元函数是一个不属于类成员的函数，但它可以访问该类的私有成员。通过将关键字 friend 放置在类定义内，函数的原型前，即可将函数声明为友元。
-- friend <return type><function name> (<parameter type list>);
 
 ##### 函数指针
 
@@ -757,21 +763,88 @@
 
   virtual ~Date() { }：析构函数名由~和类名组成，不带参数，无返回类型。
 
+###### 友元函数
+
+- 友元函数是一个不属于类成员的函数，但它可以访问该类的私有成员。通过将关键字 friend 放置在类定义内，函数的原型前，即可将函数声明为友元。
+- friend <return type><function name> (<parameter type list>);
+
 ###### 类的成员函数的体外定义
 
 - 类的成员函数可在类的定义外定义，必须在类定义中声明，且体外定义时应有类作用域：void Date::print() {}。
 
 ###### 类模板
 
-- 将原类定义中所有类型改为T，并加上模板头template<class T>。
+- 将原类定义中需要模板化的所有类型改为T，并加上模板头template <class T>。
 
 ###### 类继承
 
-- 
+- ```c++
+  // 基类
+   class Animal {
+     // eat() 函数
+     // sleep() 函数
+   };
+  
+   // 派生类：class [新的类名] : [继承方式] [基类名称] {...}
+   class Dog : public Animal {
+     // bark() 函数
+   };
+  
+  // 多继承：从多个基类继承
+  class <派生类名>:<继承方式1><基类名1>,<继承方式2><基类名2>,…
+  {
+      <派生类类体>
+  };
+  ```
+
+- 继承方式：
+  1. 公有继承（public）：基类的公有成员也是派生类的公有成员，基类的保护成员也是派生类的保护成员，基类的私有成员不能直接被派生类访问，但是可以通过调用基类的公有和保护成员来访问。
+  2. 保护继承（protected）：基类的公有和保护成员将成为派生类的保护成员。
+  3. 私有继承（private）：基类的公有和保护成员将成为派生类的私有成员。
+- 派生类不继承基类的：构造函数、析构函数和拷贝构造函数；重载运算符；友元函数。
+- 构造函数不能继承。派生类的构造函数只负责对新增的成员进行初始化，对所有从基类继承来的成员，其初始化工作还是由基类的构造函数完成。
+
+- ```c++
+  // 派生类的构造函数写法（同时进行基类构造）
+  Student(char* str,char* name) : Person(name) {  // 派生类构造函数，先将name传给基类构造函数
+  	passed = new char[MAXSIZE];
+  	strcpy_s(passed, strlen(str) + 1, str);
+  }
+  
+  // 派生类重写基类中函数方法：虚函数
+  virtual void all_info() {        // 重新定义与基类同名的函数，显示全部信息
+  	Person::all_info();          // 通过引用调用基类的同名函数
+  	cout << "考试通过科目为：" << passed << endl;
+  }
+  ```
 
 ###### 虚函数
 
-- 
+- ```c++
+  virtual <类型说明符 ><函数名>(<参数表>)
+  ```
+
+- 允许在派生类中重新定义与基类同名的函数，且可通过基类指针或引用来访问基类和派生类中的同名函数。
+
+###### 纯虚函数
+
+- ```c++
+  virtual <类型说明符 ><函数名>(<参数表>) = 0;  
+  // 在基类和派生类中都要用virtual定义为虚函数
+  ```
+  
+- 声明了纯虚函数的类是一个抽象类。用户不能创建抽象类的实例，只能创建它的派生类的实例。
+- 纯虚函数必须在继承类中重新声明函数（不加后面的=0），且在纯虚函数在抽象类中没有定义。定义纯虚函数的目的在于使派生类仅仅只是继承函数的接口，让所有的派生类对象都可以执行纯虚函数的动作，但类无法为纯虚函数提供一个合理的默认实现。
+
+###### this指针
+
+- 编译器给成员函数传递一个隐藏的对象指针参数，该指针总是指向当前要引用的对象，称为“this指针”，可实现成员函数的链式调用（通过函数返回this指针）。
+- 调用当前对象下的变量n：return this->n；调用当前对象下的函数f：this.f()。
+
+###### const数据成员
+
+- const int a：常量数据成员必须被初始化，切初始化后不可被改变。
+- const成员函数：int const_f() const {};：在函数头后加入"const"关键字。const成员函数不能改变成员变量。
 
 ##### 函数自引用
 
@@ -1658,4 +1731,160 @@
   ​    EVENT_FLAG_SHIFTKEY：按Shift不放事件
 
   参数5为鼠标事件ID。
+
+## Yolo
+
+#### 指标分析
+
+- mAP：综合衡量检测效果
+
+- IOU：预测框与真值框的交集除以它们的并集。
+
+- TP：正确划分正例个数；正->正
+
+  FP：错误划分正例个数；负->正
+
+  FN：错误划分负例个数；正->负
+
+  TN：正确划分负例个数；负->负
+
+  一般来说，查准率越高，查全率越低。
+
+- Precision查准率（正确划分正例个数/全部个数）：
+  $$
+  p=TP/(TP+FP)
+  $$
+
+- Recall查全率（预测样本中实际正样本数 / 预测的样本数）：
+  $$
+  r=TP/(TP+FN)
+  $$
+
+#### 分类
+
+- one stage：仅使用一个CNN网络，直接预测目标的类别与位置。
+
+- two stage：先使用CNN网络产生目标位置，然后再在目标位置上做分类与回归。
+
+#### 实现方法
+
+1. 将一幅图像分为S×S个网格，如果某个object的中心落在网格中，则这个网格负责预测这个object。
+
+2. 每个网格负责预测B个（B为先验框个数）bounding box和C个class的可能度。每个bounding box预测5个值：自身位置（x、y、w、h），边界框confidence（c=Pr(object)×IOU）。因此图片最终输出S×S×(5*B+C)的一组tensor。
+
+   可以得到每个bounding box的class-specific confidence score ：c=Pr(Classi|Object)×Pr(object)×IOU。设置阈值，滤掉低于阈值的bounding box，再进行NMS处理（非极大值抑制），得到最终检测结果。
+
+3. 卷积网络设计：如图，采用24个卷积层和2个全连接层。最终得到S×S×(5*B+C)的一组tensor。
+
+4. 网络训练：预训练分类模型采用20个卷积层，然后添加一个average-pool层和全连接层。预训练之后，在预训练得到的20层卷积层之上加上随机初始化的4个卷积层和2个全连接层。不断采用深度学习算法直到损失函数最小，则训练完成。
+
+   训练损失函数：
+
+   ![image-20211213191546990](C:\Users\user\AppData\Roaming\Typora\typora-user-images\image-20211213191546990.png)
+
+   权重：yolo对不同的部分采用了不同的权重值。对于定位误差，即边界框坐标预测误差，采用较大的权重 ![[公式]](https://www.zhihu.com/equation?tex=%5Clambda+_%7Bcoord%7D%3D5) 。然后其区分不包含目标的边界框与含有目标的边界框的置信度，对于前者，采用较小的权重值 ![[公式]](https://www.zhihu.com/equation?tex=%5Clambda+_%7Bnoobj%7D%3D0.5) 。其它权重值均设为1。
+
+   预测函数：Yolo将目标检测看成回归问题，所以采用的是均方差损失函数，其同等对待大小不同的边界框，但是实际上较小的边界框的坐标误差应该要比较大的边界框要更敏感。为了保证这一点，将网络的边界框的宽与高预测改为对其平方根的预测，即预测值变为![[公式]](https://www.zhihu.com/equation?tex=%28x%2Cy%2C%5Csqrt%7Bw%7D%2C+%5Csqrt%7Bh%7D%29) 。
+
+5. 预测：对于每个预测框，根据类别置信度选取置信度最大的那个类别作为其预测标签，得到各个预测框的预测类别及对应的预测框置信度值。然后将置信度小于置信度阈值的box过滤掉，剩余置信度较高的预测框。最后再对这些预测框使用NMS算法，留下的就是检测结果。
+
+#### 改进
+
+- yolov2：
+
+  1. 采用先验框（Anchor Boxes），使用K-means聚类提取先验框尺度：对训练集中标注的真实边框进行5类聚类分析，每类边框取中间值，作为先验框大小，以寻找尽可能匹配样本的边框尺寸。
+
+     聚类中的距离：<img src="C:\Users\user\AppData\Roaming\Typora\typora-user-images\image-20211213194206691.png" alt="image-20211213194206691" style="zoom: 80%;" />
+
+  2. 约束预测边框的调整位置，使预测更稳定：<img src="C:\Users\user\AppData\Roaming\Typora\typora-user-images\image-20211213195534353.png" alt="image-20211213195534353" style="zoom:67%;" />
+
+  3. 引入passthrough层，在最后一个pooling之前，将特征图一拆四直接传递（passthrough）到pooling后（并且又经过一组卷积）的特征图，两者连接到一起作为输出的特征图。防止最后一层感受野过大，以在特征图中保留一些细节信息。
+
+- yolov3：
+
+  1. 设计多scale检测不同大小物体：设置13×13（最大感受野）、26×26、52×52（最小感受野）三种尺寸的特征图，每种尺寸下通过K-means聚类提取3种先验框尺度，共3×3=9类。
+
+     因此，卷积层最后输出的向量为 N×N×[3×(5+C)]。
+
+  2. 
+
+- yolov4：
+
+- yolov5：
+
+#### Yolov5+pytroch训练自己的数据集（Ubuntu）
+
+1. 环境搭建：
+
+   ```bash
+   // clone yolov5文件夹
+   git clone https://github.com/ultralytics/yolov5
+   // 安装需要的pip包
+   pip install -U -r requirements.txt
+   ```
+
+2. 数据准备：在data文件夹下建立Annotations、images、ImageSets、labels四个文件夹。Annotations存放xml文件；images存放原图像；ImageSets文件夹下继续新建Main文件夹，下建立train.txt和test.txt文件；labels存放标签文件。
+
+   ![img](https://img-blog.csdnimg.cn/20190604150638508.png)
+
+3. 初始化训练文件
+
+   ```bash
+   // 划分训练集与测试集，在ImageSets/Main文件下生成train和test
+   python3 temp.py
+   // 生成labels标签文件
+   python3 voc_labels
+   ```
+
+4. 配置训练文件
+
+   在data目录下新建user.yaml，配置训练用的数据，内容如下：
+
+   ```python
+   # COCO 2017 dataset http://cocodataset.org
+   # Download command: bash yolov5/data/get_coco2017.sh
+   # Train command: python train.py --data ./data/coco.yaml
+   # Dataset should be placed next to yolov5 folder:
+   #   /parent_folder
+   #     /coco
+   #     /yolov5
+    
+   # train and val datasets (image directory or *.txt file with image paths)
+   train: xx/xx/train2017.txt  # 上面生成的train路径
+   val: xx/xx/val2017.txt      # 上面生成的test路径
+   #test: ../coco/test-dev2017.txt  # 20k images for submission to https://competitions.codalab.org/competitions/20794
+   
+   # number of classes
+   nc: 2                       # 训练的类别数量
+    
+   # class names
+   names: ['apple','orange']   # 训练的类别名称
+    
+   # Print classes
+   # with open('data/coco.yaml') as f:
+   #   d = yaml.load(f, Loader=yaml.FullLoader)  # dict
+   #   for i, x in enumerate(d['names']):
+   #     print(i, x)
+   ```
+
+   从models文件夹中选择一个预训练模型文件（如yolov5m.yaml）复制到data文件夹下，并修改其中头部内容：
+
+   ```python
+   # parameters
+   nc: 2  # number of classes 训练的类别数量
+   ```
+
+5. 训练权重文件
+
+   ```bash
+   python3 train.py --data data/user.yaml --cfg yolov5s.yaml --weights '' --batch-size 16 --epochs 100
+   ```
+
+6. 测试
+
+   ```bash
+    python detect.py -- weights best.pt --source file.jpg  # image (file.mp4  # video)
+   ```
+
+## 神经网络与深度学习
 
