@@ -267,7 +267,7 @@ Robot Learning Note
 
 #### Ubuntu系统使用技巧
 
-- 
+
 
 ## Git操作及命令
 
@@ -553,7 +553,6 @@ Robot Learning Note
 
   ​           a[: : -1, : , : ]：获取第一个维度逆序，其他维度不变的数组
 
-  
 
 ### Matplotlib
 
@@ -589,7 +588,6 @@ Robot Learning Note
   
   plt.xticks(())：隐藏坐标轴。
   
-  
 
 ### PyQt5
 
@@ -603,109 +601,231 @@ Robot Learning Note
 
 - 不以.c结尾：cmath、cstdio、cstring、iostream。
 
+##### 作用域分辨符：::
+
+- 类成员分辨：Class_name :: member
+- 全局作用域分辨：:: name
+
 ##### 名字空间
 
 - namespace ns{}：名字空间，防止同名冲突。通过::运算符限定属于哪个namespace。
 
-  有3种方法使用名字空间X的名字name：using namespace X：引入整个名字空间，使用时不再用::限制；using X::name：使用空间中的单个名字；X::name：程序中需加上名字空间前缀。
+  3种方法使用名字空间X的名字name：using namespace X：引入整个名字空间，使用时不再用::限制；using X::name：使用空间中的单个名字；X::name：程序中需加上名字空间前缀。
 
-  using namespace std：使用标准名字空间std中所有名字。
+  ```c++
+  using namespace std;    // 使用标准名字空间std中所有名字
+  ```
 
 ##### 标准输入输出
 
-- cout：标准输出流（屏幕窗口），cout << "text" << endl;。
-- cin：标准输入流（键盘），cin >> a;。
+- cout：标准输出流（屏幕窗口），
 
-##### 别名
+- cin：标准输入流（键盘），
 
-- 引用类型：double &b = a;：b是a的别名。
+  ```c++
+  cout << "text" << endl ;
+  cin >> a;
+  ```
 
-  引用常用作函数形参，表示形参和实参是同一个对象（形参是实参的引用），则在函数中对形参的修改也就是对实参的修改：void fun(int &x, int &y) {} / fun(a, b);。若用const修改符修饰引用，如void fun(const int &x, int &y)，则函数中x不可被修改。
+##### 引用
 
-##### 内联函数
+- ```c++
+  double &b = a;    // 通过别名b直接访问某个变量a
+  ```
 
-- inline double distance(double a, double b) {return ...}：类似宏定义，将函数直接替换为函数内语句展开，避免函数调用开销。
+- ```c++
+  // 引用常用用于函数传参，表示形参是实参的引用（同一个对象），则在函数中对形参修改等价于直接对实参修改
+  void fun(int &x, int &y) {...} 
+  fun(a, b);
+  void fun(const int &x, int &y);    // 若用const修改符修饰引用的形参，则函数中x不可被修改
+  ```
+
+- 引用在定义时必须初始化，初始化后，不能改变引用的指向。
+
+- 如果如int &f(); a = f();返回函数的引用，则实际为返回了return变量的引用。修改a等同于修改return变量的值。
 
 ##### try-catch
 
-- try-catch异常情况处理：try {throw x} catch (int result) { } catch (char * s){ }：正常代码放在try块，try通过throw抛出异常；catch中定义形参，捕获try块抛出的异常。
+- try-catch异常情况处理：
+
+  正常代码放在try块，try通过throw抛出异常。catch中定义形参，获取try块抛出的异常（按类型获取）。
+
+  ```c++
+  try {
+      throw x ;
+  } 
+  catch (int result) { } 
+  catch (char * s){ }
+  ```
+
+##### 动态内存分配
+
+- new：自动分配数个一定大小的内存块，返回连续内存的起始地址。如dp = new double[5];。
+- delete[]：释放dp指向的多个double元素占据的内存块。若无[]，则只释放第一个元素的内存块。
 
 ##### 重载
 
-- 函数重载：C++允许函数同名，只要它们的形参不同，则在调用该名称函数时会自动识别形参类型，调用合适的函数。
+###### 函数重载
 
-- 运算符重载：重新定义运算，方便特殊类型的变量进行运算。
+- C++允许函数同名，只要它们的形参不同，则在调用该名称函数时会自动识别形参类型，调用合适的函数。
+
+  ```c++
+  // 函数重载的辨析——const重载：主要通过能否对传入的参数进行修改为判断依据，const重载可看做是对函数隐含的参数this指针的参数重载，因此可以视为函数形参不同。
+  class Base{
+  public:
+  	void test(int a);
+  	void test(const int a);    //error，不属于重载，函数名冲突。因为传参是传值，所以不会改变实参的值，被视为同一个函数
+  };
+  
+  class Base{
+  public:
+  	void test(int &a);
+  	void test(const int &a);    //right，属于重载。传参是引用，前一个函数可能改变原值，而后一个不行，实质是不同的函数，所以算重载。
+  };
+      
+  class Base{
+  public:
+  	void test(int a);
+  	void test(int a) const;    //right，属于重载。const成员函数不能改变成员变量，实质是不同的函数，所以算重载。
+  };
+  ```
+
+###### 运算符重载
+
+- 重新定义运算，方便特殊类型的变量进行运算。
+
+- 重载运算符的函数不能有默认的参数，重载的运算符必须和用户定义的自定义类型的对象一起使用，其参数至少应有一个是类对象。
 
   ```c++
   [返回值类型] operator [原运算符] (参数1, 参数2) {
       [运算]
   	return [返回值];
   }
-  ```
   
-  ```c++
-  // 备注：=可以用this指针来返回
-  String& operator=(const String& other) {    // 赋值函数
+  String& operator = (const String& other) {    // 例子："=" 运算重载
   	strcpy_s(m_data, strlen(other.m_data) + 1, other.m_data);
     	cout << "赋值成功！" << endl;
-    	return *this;
-  };  
+    	return *this;    // 备注：=可以用this指针来返回
+  }; 
   ```
   
-  模板函数
-
-- 模板函数：通过模板函数，自动生成一个针对T类型的具体函数。
+- 重载运算符可以作为类的成员函数和友元函数，其参数表不同。
 
   ```c++
+  Complex operator+(Complex &c2)                      // 成员函数：c1+c2 被替换为 c1.operator+(c2)，只要一个形参
+  friend Complex operator+(Complex &c1, Complex &c2)  // 友元函数：c1+c2被替换为operator+（c1，c2），要两个形参。运算符左侧的操作数与函数第一个参数对应，右侧的操作数与函数的第二个参数对应
+  ```
+
+  有的运算符必须定义为类的成员函数（赋值运算符、下标运算符、函数调用运算符），有的运算符不能定义为类的成员函数（流插入“<<”和流提取运算符”>>”、类型转换运算符）。一般将单目运算符重载为成员函数，将双目运算符重载为友元函数。
+
+- 重载流运算符：
+
+  只能将重载>>和<<的函数作为友元函数或普通函数，而不能定义为成员函数。
+
+  ```c++
+  friend ostream& operator << (ostream&,Complex&);
+  friend istream& operator >> (istream&,Complex&);
+  
+  ostream& operator << (ostream& output, Complex& c) {    // 形参output是ostream类对象引用
+      output << "(" << c.real << "+" << c.imag << "i)" << endl;
+  	return output;
+  }
+  istream& operator >> (istream& input, Complex& c) {      // 形参input是istream类对象引用
+  	input >> c.real >> c.imag;
+  	return input;
+  }
+  ```
+  
+- 类型转换函数：将一个类的对象转换为另一类型的数据。
+
+  函数名前不能指定函数类型，函数没有参数；其返回值类型由函数名中的类型名来确定；只能作为成员函数，不能作为友元函数或普通函数。
+
+  ```c++
+  operator double () {return real；}
+  ```
+
+##### 函数
+
+###### 函数模板
+
+- 通过模板函数，自动生成一个针对T类型的具体函数。
+
+- ```c++
   template <class T1, class T2>
-  	T1 minValue(T1 a, T2 b) {
+  T1 minValue(T1 a, T2 b) {
   	if (a < b) return a;
   	else return (T2)b;
   }
   ```
 
-##### 函数指针
+###### 内联函数
+
+- ```c++
+  inline double distance(double a, double b) {return ...}
+  ```
+
+- 类似宏定义，在编译时将函数直接替换为函数内语句展开，避免函数调用开销。
+
+- 内联函数内不允许用循环语句和开关语句；内联函数的定义必须出现在每一个调用该函数的源文件之中。
+
+###### 函数指针
 
 - 通过指针调用函数：
 
   ```c++
-  void func(int x){    //函数原型定义
+  void func(int x){           // 函数原型定义
   	cout << x;
   }
-  void (*f)(int x) = func;    //定义函数指针（函数指针+参数表=原型函数名）
-  f(1);                //使用函数指针调用函数
+  void (*f)(int x) = func;    // 定义函数指针（函数指针+参数表=原型函数名）
+  f(1);                       // 使用函数指针调用函数
   ```
 
-##### 动态内存分配
+###### 函数缺省值
 
-- new：自动分配数个一定大小的内存块，返回连续内存的起始地址。如dp = new double[5];。
-- delete[]：释放dp指向的多个double元素占据的内存块。若无[]，只释放第一个元素的内存块。
+- 若有实际参数值，则缺省值无效；否则参数值采用缺省值。
+- 带有缺省值的参数必须全部放置在参数的最后，即在带有缺省值的参数的右边不再出现无缺省值的参数。
+
+###### 占位符参数（哑元）
+
+- 函数声明时，参数可以没有标识符。为了使将来修改函数功能需要增加一个形式参数时，可利用该哑元，保证函数的接口不发生变化，从而不需要修改程序中的函数调用。
+
+- ```c++
+  void f(int x, int = 0 , float = 1.1);          // 声明
+  void f(int x, int y, float flt) {x, flt, y}    // 定义
+  f(1,2,3.0)                                     // 调用时必须为占位符参数提供一个值
+  ```
+
+###### 函数自引用
+
+- this指向调用这个函数的类型对象指针，*this为调用这个函数的那个对象，即调用这个函数的对象本身。
+
+  通过返回自引用return *this，可连续调用对象的函数，如day.add(3).add(7);。
 
 ##### 类
 
-- struct与class区别： class 类中的成员默认 private ，struct 结构体中的成员默认 public；class 继承默认 private 继承，而 struct 继承默认是 public 继承；class 可使用模板， struct 不能。
+- struct与class区别：
+  1.  class 类中的成员默认 private ，struct 结构体中的成员默认 public；
+  2. class 继承默认 private 继承，struct 继承默认是 public 继承；
+  3. class 可使用模板，struct 不能。
 
 ###### struct类
 
-- struct类定义：
+- struct类定义及初始化：
 
   ```c++
-  struct Date {
+  struct Date {            // Date类定义
   	int d, m, y;
-  	void init(int dd, int mm, int yy) {
+  	void init(int dd, int mm, int yy) {    // 构造函数
   		d = dd; m = mm; y = yy;
   	}
   	void print() {
   		cout << y << "-" << m << "-" << d << endl;
   	}
   };
+  Date day;                // 创建Date类型的day对象。
+  day.init(4, 6, 1999);    // 通过对象day调用类Date的init方法。
   ```
 
-- struct类使用：
-
-  Date day;：创建Date类型的day对象。
-
-  day.init(4, 6, 1999);：通过对象day调用类Date的init方法。
 
 ###### class类
 
@@ -713,70 +833,97 @@ Robot Learning Note
 
   ```c++
   class Student {
-  private:    //使用public和private关键字设置访问限制
-  	char *name;  //类的属性
+  private:            // 使用public和private关键字设置访问限制
+  	char *name;     // 类的属性
   	int age;
   public:
-  	Student(char *n = "no name", int a = 0) {  //构造函数
+  	Student(char *n = "no name", int a = 0) {    // 构造函数
   		name = new char[100];
   		strcpy(name, n);
   		age = a;
   	}
-  	virtual ~Student() { //析构函数
+  	~Student() {    // 析构函数
   		delete name;
   	}
   }
   ```
 
+###### 访问限制
+
+- public：可以被该类中的函数、派生类的函数、友元函数、该类的对象访问。
+- private：只能由该类中的函数、及其友元函数访问，不能被包括该类对象在内的任何其他访问。
+- protected：可以被该类中的函数、派生类的函数、友元函数访问，但不能被该类的对象访问。
+
 ###### 构造函数与析构函数
 
-- 构造函数：和类名同名且无返回类型的函数，在定义对象时会自动被调用，用于初始化类对象成用。
+- 构造函数：和类名同名，可以带参数，且无返回类型的函数；在定义对象时会自动被调用，用于初始化类对象成用。构造函数可以重载。
 
-  - 构造函数定义：
-
-  ```c++
-  Date(int dd =1, int mm =1, int yy =1) {
-  	d = dd; m = mm; y = yy;
-  	cout << "构造函数" << endl;
-  }
-  ```
-
-  - 构造函数使用：
+  - 构造函数定义及使用：
 
     ```c++
-    Date day(1, 1, 1);
+    Date(int dd =1, int mm =1, int yy =1) {    // 构造函数
+    	d = dd; m = mm; y = yy;
+    	cout << "构造函数" << endl;
+    }
+    Date day(1, 1, 1);    // 构造函数使用（在创建对象时可赋初值）
     ```
 
-  - 拷贝构造：用一个对象给另一个对象初始化：student s;  student m(s);
-
-    拷贝构造函数：
+  - 拷贝构造函数：用一个对象给另一个对象初始化：
 
     ```c++
-    student(const student &s) { //拷贝构造函数
+    Student(const Student &s) {    // 拷贝构造函数
     	name = new char[100];
     	strcpy(name, s.name);
     	age = s.age;
     }
+    Student s;        // 用来拷贝的原对象s
+    Student m(s);     // 用原对象s来拷贝构造新对象m
     ```
+    
+  - 默认构造函数：如果没有提供任何构造函数，编译器会创建一个默认的构造函数；如果定义了构造函数，但没有无参构造函数，则创建对象时，若不带参数，将会出错。
 
 - 析构函数：在类对象销毁时被自动调用，用于释放该对象占用的资源，如释放占用的内存、关闭打开的文件。
 
-  virtual ~Date() { }：析构函数名由~和类名组成，不带参数，无返回类型。
+   ```c++
+   ~Date() { }    // 析构函数名由~+类名组成，不带参数，无返回类型，不能被重载。
+   ```
 
 ###### 友元函数
 
-- 友元函数是一个不属于类成员的函数，但它可以访问该类的私有成员。通过将关键字 friend 放置在类定义内，函数的原型前，即可将函数声明为友元。
-- friend <return type><function name> (<parameter type list>);
+- 友元函数是不属于类成员的函数，但它可以访问该类的private成员。通过将关键字 friend 放置在类定义内的函数原型声明前，即可将函数声明为友元。友元函数定义在类外。
 
-###### 类的成员函数的体外定义
+- ```c++
+  friend <return type> <function name> (<parameter type list>);
+  ```
 
-- 类的成员函数可在类的定义外定义，必须在类定义中声明，且体外定义时应有类作用域：void Date::print() {}。
+###### 成员函数的体外定义
+
+- 类的成员函数可在类的定义外定义，但必须在类定义中声明，且体外定义时应有类作用域：void Date::print() {}。
 
 ###### 类模板
 
-- 将原类定义中需要模板化的所有类型改为T，并加上模板头template <class T>。
+- 将原类定义中需要模板化的所有类型改为T，并加上模板头。
+
+- ```c++
+  template<class T> 
+  class Stack { 
+  public: 
+  	Stack(int); 
+  	void push(T ptr); 
+  	T pop(); 
+  	T top() const; 
+  	int size() const; 
+  	~Stack(); 
+  private: 
+  	T *data; 
+  	int length; 
+  	int ptr; 
+  };
+  ```
 
 ###### 类继承
+
+- 在一个已存在的类的基础上建立一个新的类。可声明一个基类，在基类中只提供某些基本功能，在声明派生类时加入某些具体的功能，形成适用于某一特定应用的派生类。
 
 - ```c++
   // 基类
@@ -790,76 +937,235 @@ Robot Learning Note
      // bark() 函数
    };
   
-  // 多继承：从多个基类继承
-  class <派生类名>:<继承方式1><基类名1>,<继承方式2><基类名2>,…
+  // 多继承：从多个基类继承：class [新的类名] : [继承方式1] [基类名称1] , [继承方式2] [基类名称2] {...}
+  class bird : public Animal, protected FlyingThing, …
   {
-      <派生类类体>
+      // fly() 函数
   };
   ```
 
-- 继承方式：
+- 继承方式：默认继承方式是私有继承
   1. 公有继承（public）：基类的公有成员也是派生类的公有成员，基类的保护成员也是派生类的保护成员，基类的私有成员不能直接被派生类访问，但是可以通过调用基类的公有和保护成员来访问。
   2. 保护继承（protected）：基类的公有和保护成员将成为派生类的保护成员。
-  3. 私有继承（private）：基类的公有和保护成员将成为派生类的私有成员。
-- 派生类不继承基类的：构造函数、析构函数和拷贝构造函数；重载运算符；友元函数。
-- 构造函数不能继承。派生类的构造函数只负责对新增的成员进行初始化，对所有从基类继承来的成员，其初始化工作还是由基类的构造函数完成。
+  3. 私有继承（private）：基类的公有和保护成员将成为派生类的私有成员。则基类的成员只能由直接派生类访问，不能再继承。
+  
+- 派生类不继承基类的：构造函数和拷贝构造函数、析构函数、重载运算符、友元函数。
 
-- ```c++
+- 派生类的构造函数：构造函数不能继承，因此派生类的构造函数只对新增的成员进行初始化，所有从基类继承来的成员初始化工作仍由基类的构造函数完成。
+
+  ```c++
   // 派生类的构造函数写法（同时进行基类构造）
-  Student(char* str,char* name) : Person(name) {  // 派生类构造函数，先将name传给基类构造函数
+  Student(char* str,char* name) : Person(name) {  // 派生类构造函数，将name传给基类构造函数
   	passed = new char[MAXSIZE];
   	strcpy_s(passed, strlen(str) + 1, str);
   }
-  
+  ```
+
+- 虚基类：
+
+  类层次结构中虚基类的成员只出现一次，即基类的一个副本被所有派生类对象所共享。最后的派生类负责对虚基类初始化。
+
+  ```c++
+  class C : virtual public A {
+  public:
+      C(int n): A(n){ }
+  };
+  ```
+
+###### 多态——虚函数
+
+- ```c++
+  virtual <类型说明符><函数名>(<参数表>)
+      
   // 派生类重写基类中函数方法：虚函数
   virtual void all_info() {        // 重新定义与基类同名的函数，显示全部信息
   	Person::all_info();          // 通过引用调用基类的同名函数
   	cout << "考试通过科目为：" << passed << endl;
   }
   ```
-
-###### 虚函数
-
-- ```c++
-  virtual <类型说明符 ><函数名>(<参数表>)
-  ```
-
-- 允许在派生类中重新定义与基类同名的函数，且可通过基类指针或引用来访问基类和派生类中的同名函数。
-
-###### 纯虚函数
-
-- ```c++
-  virtual <类型说明符 ><函数名>(<参数表>) = 0;  
-  // 在基类和派生类中都要用virtual定义为虚函数
-  ```
   
-- 声明了纯虚函数的类是一个抽象类。用户不能创建抽象类的实例，只能创建它的派生类的实例。
-- 纯虚函数必须在继承类中重新声明函数（不加后面的=0），且在纯虚函数在抽象类中没有定义。定义纯虚函数的目的在于使派生类仅仅只是继承函数的接口，让所有的派生类对象都可以执行纯虚函数的动作，但类无法为纯虚函数提供一个合理的默认实现。
+- 同一个类中，不能定义名字参数个数和类型都相同的两个函数；但在类的继承层次结构中，允许在派生类中重新定义与基类一模一样但功能不同的函数，且可通过基类指针或引用来访问基类和派生类中的同名函数。
+
+  ```c++
+  // 基类指针访问基类函数
+  // 指向基类对象的指针可以指向其派生类对象，但通过基类指针访问的成员是基类的成员，而不是派生类的成员。
+  BaseClass *p;    // 基类指针
+  ChildClass child;
+  p = &child;      // 指向派生类对象
+  p->F();          // 仍然调用基类的函数F()
+  ```
+
+- 不是通过重载而是通过代码覆盖实现虚函数。重载同名函数只发生在同一个类内的函数之间，不能跨越基类和派生类。当派生类写一个和基类同名的函数时，此时发生代码覆盖。
+
+- 纯虚函数：一个在基类中声明的虚函数，但没有定义具体的操作，要求派生类根据需要定义自己的版本。
+
+  - ```c++
+    virtual <类型说明符 ><函数名>(<参数表>) = 0;    // 纯虚函数头后加"=0"
+    // 在基类和派生类中都要用virtual定义为虚函数
+    ```
+
+  - 声有纯虚函数的类是一个抽象类（不用来定义对象而只作为一种基本类型用作继承的类），且纯虚函数在抽象类中没有定义。用户不能创建抽象类的实例，只能创建它的派生类的实例。
+  - 定义纯虚函数的目的在于使派生类仅仅只是继承函数的接口，让所有的派生类对象都可以执行纯虚函数的动作，但类无法为纯虚函数提供一个合理的默认实现。
+  - 纯虚函数必须在继承类中重新声明函数（不加后面的=0）。 若纯虚函数没有被重写，则仍是抽象类，会引发错误。
 
 ###### this指针
 
-- 编译器给成员函数传递一个隐藏的对象指针参数，该指针总是指向当前要引用的对象，称为“this指针”，可实现成员函数的链式调用（通过函数返回this指针）。
-- 调用当前对象下的变量n：return this->n；调用当前对象下的函数f：this.f()。
+- 编译器给成员函数传递一个隐藏的对象指针参数，该指针总是指向当前要引用的对象，称为this指针。this指针是常量指针，不可修改值。
 
-###### const数据成员
+- 调用当前对象下的变量n：return this->n 或 return  (\this).n
 
-- const int a：常量数据成员必须被初始化，切初始化后不可被改变。
-- const成员函数：int const_f() const {};：在函数头后加入"const"关键字。const成员函数不能改变成员变量。
+  调用当前对象下的函数f：this.f()
 
-##### 函数自引用
+- this指针可实现成员函数的链式调用（通过函数返回this指针）：
 
-- this指向调用这个函数的类型对象指针，*this为调用这个函数的那个对象，即调用这个函数的对象本身。
+  ```c++
+  Class X {
+  	X &assign(){ …; return (*this)};
+  	X &setvalue(){…; return (*this)};
+  }
+  X objX;
+  objX.assign().setvalue().assign();    // 链式调用
+  ```
 
-  通过返回自引用return *this，可连续调用对象的函数，如day.add(3).add(7);。
+###### 句柄类
+
+- 一个特殊的类，该类中含有一个指向被隐藏的类的指针。
+
+- 实现部分并没有暴露在.h中，保密性好；实现的细节均隐藏在句柄类的背后，因此当实现发生变化时句柄类没有改变，就不必重新编译客户程序，只需重新编译隐藏的实现这一小部分代码并连接即可。
+
+- 公开的部分：
+
+  ```c++
+  #ifndef HANDLE_H
+  #define HANDLE_H
+  class Handle {
+  	struct Cheshire;    // 句柄类cheshire的声明
+  	Cheshire* smile;    // smile指针指向具体的实现
+  public:
+  	void initialize();
+  	void cleanup(); 
+  	int read();
+  	void change(int);
+  };
+  #endif // HANDLE_H
+  ```
+
+- 隐藏的部分：
+
+  ```c++
+  // 句柄类的实现: cheshire
+  struct Handle::Cheshire {
+  	int i;
+  };
+  void Handle::initialize() {
+  	smile = new Cheshire;
+  	smile->i = 0;
+  }
+  void Handle::cleanup() {
+  	delete smile;
+  }
+  int Handle::read() {
+  	return smile->i;
+  }
+  void Handle::change(int x) {
+  	smile->i = x;
+  }
+  ```
+
+###### 静态成员变量
+
+- ```c++
+  int f() {
+  	static int i = 0;    // 静态成员变量
+  	return i; 
+  }
+  ```
+
+- 类的所有对象共用一个静态成员变量；静态成员不可在类体内进行赋值；通过一个对象给它赋值，其他对象里的该成员也会发生变化；静态成员变量不是对象的一部分。
+
+- 静态成员只能在类内先声明，再在类外进行初始化。 ClassName :: StaticName＝初值。
+
+- 可以通过对象进行访问，也可以ClassName :: StaticName访问。
+
+##### const
+
+- C++编译器不为const创建存储空间，而是把它保存在符号表里，即编译时常量。如果想用运行期间产生的值初始化一个变量，并且知道在该变量的生命期内其值不变，则可用const限定该变量。
+
+- const仅在const被定义过的文件里才可见，不用担心名字冲突。
+
+- 当定义一个const时，必须赋一个值给它，除非用extern做出了清楚的说明；当用extern说明了const时，编译器会强制为const分配空间，而不是保存在符号表中。
+
+- const指针：不可改变指向的指针（const修饰符应在最前面）
+
+  非const对象的地址可赋给const指针；const对象的地址不可赋给非const指针。
+
+  ```c++
+  const int *u;    // u是一个const指针，它指向int;
+  int const *v;    // v是一个指向恰好是const的int对象的普通指针；
+  ```
+
+- 返回引用的const：阻止返回值作为左值出现（如防止类中private对象泄露的陷阱出现）。
+
+  ```c++
+  const int& f(){return i};    // 本来i被返回引用，可作为左值被修改，但加入const后避免了返回值作为左值出现
+  ```
+
+- const用于函数参数传递：兼顾效率与可靠性。
+
+  ```c++
+  char *strcpy(const char& src)
+  ```
+
+- 类中的const数据成员：
+
+  ```c++
+  const int a;         // const常量数据成员：声明时必须被初始化，且初始化后不可被改变。
+  int f() const {};    // const成员函数：在函数头后加入const关键字，不能改变成员变量。
+  ```
+
+- const对象：声明为const的对象只能调用声明为const的成员函数。
+
+- <img src="C:\Users\user\AppData\Roaming\Typora\typora-user-images\image-20220102090111595.png" alt="image-20220102090111595" style="zoom: 67%;" />
+
+##### 类型转换
+
+- static_cast 转换：
+
+  ```c++
+  static_cast < new_type > (expression)    // static类型转换
+  ```
+
+  把expression转换为new_type类型。用于：①用于类层次结构中基类和派生类间指针或引用的转换，上行转换是安全的，下行转换时由于没有动态类型检查，所以是不安全的；②用于基本数据类型之间的转换，如把int转换成char，把int转换成enum；③把空指针转换成目标类型的空指针；④把任何类型的表达式转换成void类型。注意：static_cast不能转换掉expression的const等属性。
+
+- dynamic_cast 转换：
+
+  ```c++
+  dynamic_cast< type* >(e)    // type必须是一个类类型且必须是一个有效的指针
+  dynamic_cast< type& >(e)    // type必须是一个类类型且必须是一个左值
+  dynamic_cast< type&& >(e)    // type必须是一个类类型且必须是一个右值
+  // e的类型必须符合以下三个条件中的任何一个：
+  // 1、e的类型是目标类型type的公有派生类
+  // 2、e的类型是目标type的共有基类
+  // 3、e的类型就是目标type的类型。
+  ```
+
+  dynamic_cast主要用于类层次间的上行转换和下行转换，还可以用于类之间的交叉转换。在类层次间进行上行转换时，dynamic_cast和static_cast的效果是一样的；下行转换时，dynamic_cast具有类型检查的功能，比static_cast更安全。
 
 ##### 容器Vector
+
+- 容器定义在C++标准模板库中。std::vector是一种常用的容器，功能与数组相似。
+
+- ```c++
+  vector<float> v(3);     //类模板
+  v[0]=1;v[1]=2;v[2]=3;
+  ```
 
 ##### 其他
 
 - 用程序块{ }形成内部作用域，可定义域外部作用域同名的变量，在该块里隐藏外部变量。
-- 访问和内部作用域变量同名的全局变量，要用全局作用域限定符 ::
-- 默认形参：函数的形参可带有默认值，但必须在最右边。
 - string类：string s2("text"); / string s3(s1);：使用构造函数定义字符串变量，可以赋初值。
+
+
 
 ## ROS
 
@@ -1732,6 +2038,8 @@ Robot Learning Note
 
   参数5为鼠标事件ID。
 
+
+
 ## Yolo
 
 #### 指标分析
@@ -1886,5 +2194,12 @@ Robot Learning Note
     python detect.py -- weights best.pt --source file.jpg  # image (file.mp4  # video)
    ```
 
+
+
 ## 神经网络与深度学习
 
+
+
+
+
+## 机械设计
